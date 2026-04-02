@@ -46,12 +46,17 @@ const NEWS = [
   },
 ];
 
-function renderLanding(user) {
+function renderLanding(user, stats = {}) {
   const loginOrDashboard = user
     ? `<a href="/cv/${user.id}" class="btn-primary">Ver mi CV</a>`
     : `<a href="/auth/google" class="btn-primary">Empezar gratis con Google</a>`;
 
+  const baseUrl = process.env.BASE_URL || 'https://webcv.app';
   const waNumber = process.env.WHATSAPP_NUMBER || '';
+  const cvCount = stats.cvCount || 0;
+  const socialProofText = cvCount > 10
+    ? `${cvCount} CVs creados esta semana`
+    : '100% gratuito hasta descargar';
 
   const jobsHtml = JOBS.map(j => `
     <div class="job-card">
@@ -83,7 +88,29 @@ function renderLanding(user) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CreaCV — Tu CV profesional en minutos</title>
+  <title>CreaCV — Crea tu CV profesional gratis en minutos</title>
+  <meta name="description" content="Crea tu curriculum vitae profesional gratis en menos de 5 minutos. Desde el navegador o por WhatsApp. Descarga el PDF sin marca de agua por solo 5€.">
+  <meta name="keywords" content="hacer cv gratis, curriculum vitae online, cv camarero, cv almacen, cv sin experiencia, crear cv movil, cv whatsapp">
+  <link rel="canonical" href="${baseUrl}/">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="CreaCV — Tu CV profesional en minutos">
+  <meta property="og:description" content="Crea tu curriculum vitae profesional gratis. Descarga el PDF sin marca por 5€.">
+  <meta property="og:url" content="${baseUrl}/">
+  <meta property="og:image" content="${baseUrl}/og-image.png">
+  <meta property="og:locale" content="es_ES">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CreaCV — Tu CV profesional en minutos">
+  <meta name="twitter:description" content="CV gratis en minutos. Por web o WhatsApp. PDF sin marca por 5€.">
+  <meta name="twitter:image" content="${baseUrl}/og-image.png">
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebApplication","name":"CreaCV",
+   "url":"${baseUrl}","applicationCategory":"BusinessApplication",
+   "description":"Generador de curriculum vitae profesional online y por WhatsApp",
+   "offers":{"@type":"Offer","price":"5.00","priceCurrency":"EUR","description":"Descarga PDF sin marca de agua"}}
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -104,6 +131,14 @@ function renderLanding(user) {
     /* HERO */
     .hero { background: linear-gradient(155deg, #e8f0f7 0%, #e8f5e9 100%); padding: 88px 56px 80px; text-align: center; }
     .hero-badge { display: inline-block; background: #e8f5e9; color: #2e7d32; font-size: 13px; font-weight: 700; padding: 5px 16px; border-radius: 20px; margin-bottom: 22px; letter-spacing: 0.3px; }
+    .hero-stats { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin: 20px 0 8px; }
+    .hero-stat { font-size: 13px; color: #3a5a7a; font-weight: 600; background: rgba(255,255,255,0.7); padding: 6px 14px; border-radius: 20px; }
+    .ejemplos-section { background: #fff; padding: 72px 40px; }
+    .ejemplos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; max-width: 960px; margin: 0 auto; }
+    .ejemplo-card { background: #f4f8fc; border: 1.5px solid #dde6f0; border-radius: 10px; padding: 18px 16px; text-decoration: none; color: #1e2d4d; display: flex; flex-direction: column; gap: 6px; transition: border-color 0.2s, box-shadow 0.2s; }
+    .ejemplo-card:hover { border-color: #3a7ca5; box-shadow: 0 4px 16px rgba(58,124,165,0.12); }
+    .ejemplo-card-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #3a7ca5; }
+    .ejemplo-card-title { font-size: 14px; font-weight: 700; }
     .hero h1 { font-family: 'Raleway', sans-serif; font-size: clamp(34px, 5vw, 58px); font-weight: 800; color: #1e2d4d; line-height: 1.12; margin-bottom: 20px; }
     .hero h1 em { color: #3a7ca5; font-style: normal; }
     .hero p { font-size: 18px; color: #4a5a6a; max-width: 540px; margin: 0 auto 38px; }
@@ -215,6 +250,11 @@ function renderLanding(user) {
   <div class="hero-badge">Solo 5 EUR · Pago unico · Sin suscripcion</div>
   <h1>Tu CV profesional,<br><em>listo en minutos</em></h1>
   <p>Rellena un formulario sencillo, anade tu foto si quieres, y descarga un PDF impecable listo para enviar.</p>
+  <div class="hero-stats">
+    <span class="hero-stat">⭐ 4.9/5 valoracion media</span>
+    <span class="hero-stat">📄 ${escHtml(socialProofText)}</span>
+    <span class="hero-stat">⚡ Listo en menos de 5 min</span>
+  </div>
   <div class="hero-ctas">
     ${user
       ? `<a href="/crear" class="btn-primary">Crear mi CV ahora</a>`
@@ -302,6 +342,38 @@ function renderLanding(user) {
       <li>Nueva descarga tras editar = 5 EUR</li>
     </ul>
     ${loginOrDashboard}
+  </div>
+</section>
+
+<!-- EJEMPLOS POR PROFESION -->
+<section class="ejemplos-section">
+  <p class="section-eyebrow">Plantillas gratuitas</p>
+  <h2 class="section-title">CV por profesion</h2>
+  <div class="ejemplos-grid">
+    <a href="/cv-ejemplo/camarero" class="ejemplo-card">
+      <span class="ejemplo-card-label">Hosteleria</span>
+      <span class="ejemplo-card-title">CV Camarero/a</span>
+    </a>
+    <a href="/cv-ejemplo/almacen" class="ejemplo-card">
+      <span class="ejemplo-card-label">Logistica</span>
+      <span class="ejemplo-card-title">CV Mozo/a de almacen</span>
+    </a>
+    <a href="/cv-ejemplo/auxiliar-farmacia" class="ejemplo-card">
+      <span class="ejemplo-card-label">Farmacia</span>
+      <span class="ejemplo-card-title">CV Auxiliar de farmacia</span>
+    </a>
+    <a href="/cv-ejemplo/conductor-reparto" class="ejemplo-card">
+      <span class="ejemplo-card-label">Reparto</span>
+      <span class="ejemplo-card-title">CV Conductor/a de reparto</span>
+    </a>
+    <a href="/cv-ejemplo/recepcionista" class="ejemplo-card">
+      <span class="ejemplo-card-label">Atencion al cliente</span>
+      <span class="ejemplo-card-title">CV Recepcionista</span>
+    </a>
+    <a href="/cv-ejemplo/limpieza" class="ejemplo-card">
+      <span class="ejemplo-card-label">Servicios</span>
+      <span class="ejemplo-card-title">CV Personal de limpieza</span>
+    </a>
   </div>
 </section>
 

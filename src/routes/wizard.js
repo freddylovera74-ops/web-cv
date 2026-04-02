@@ -88,6 +88,17 @@ function layout(title, content, step) {
   </style>
 </head>
 <body>
+<script>
+  // Warn user before closing/refreshing mid-form (steps 1-4)
+  if (${step} < 5) {
+    let formDirty = false;
+    document.addEventListener('input', () => { formDirty = true; });
+    document.addEventListener('submit', () => { formDirty = false; });
+    window.addEventListener('beforeunload', (e) => {
+      if (formDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+  }
+</script>
 <nav>
   <a class="nav-logo" href="/">Crea<span>CV</span></a>
   <a href="/" style="font-size:13px;color:#5a6a7a;text-decoration:none;">Cancelar</a>
@@ -335,7 +346,7 @@ router.get('/paso/:step', requireAuth, (req, res) => {
     const previewEncoded = Buffer.from(previewHtml).toString('base64');
 
     return res.send(layout('Vista previa y pago', `
-      <p class="preview-note">Vista previa con marca de agua. Guarda tu CV y descarga el PDF sin marca por 2 EUR.</p>
+      <p class="preview-note">Vista previa con marca de agua. Guarda tu CV y descarga el PDF sin marca por <strong>5 EUR</strong>.</p>
       <div class="cv-preview-wrap">
         <iframe id="cv-preview" srcdoc="" title="Vista previa CV"></iframe>
       </div>
@@ -449,7 +460,8 @@ router.post('/guardar', requireAuth, (req, res) => {
   }
 
   req.session.wizard = null;
-  res.redirect(`/cv/${userId}`);
+  const savedUser = db.prepare('SELECT view_token FROM users WHERE id = ?').get(userId);
+  res.redirect(`/cv/${userId}?token=${savedUser.view_token}`);
 });
 
 // ── Helper renderers ──────────────────────────────────────────────────────

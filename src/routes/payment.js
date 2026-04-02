@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { getDb, getUserById, getCvData } = require('../db');
+const { getDb, getUserById, getCvData, getUserByViewToken } = require('../db');
 const { generatePdf } = require('../services/pdf');
 const { renderCvHtml } = require('../views/cv.html.js');
 
@@ -35,7 +35,7 @@ router.post('/create-checkout-session', async (req, res) => {
       }],
       mode: 'payment',
       success_url: `${process.env.BASE_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.BASE_URL}/cv/${userId}`,
+      cancel_url: `${process.env.BASE_URL}/ver/${user.view_token}`,
       metadata: { userId: String(userId), cvVersion: String(cvData.version) },
     });
 

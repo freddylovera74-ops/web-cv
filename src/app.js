@@ -5,7 +5,8 @@ const session = require('express-session');
 const passport = require('passport');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const { initDb } = require('./db');
+const { initDb, getDb } = require('./db');
+const SqliteStore = require('better-sqlite3-session-store')(session);
 require('./services/passport');
 
 const app = express();
@@ -20,10 +21,10 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:'],
       connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
+      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       objectSrc: ["'none'"],
       frameSrc: ["'none'"],
     },
@@ -57,8 +58,12 @@ app.use('/stripe-webhook', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// OWASP-FIX: A07 — Harden session cookie (httpOnly, secure in prod, sameSite lax, maxAge 24h)
+// OWASP-FIX: A07 — Harden session cookie + persist sessions in SQLite (survives deploys)
 app.use(session({
+  store: new SqliteStore({
+    client: getDb(),
+    expired: { clear: true, intervalMs: 15 * 60 * 1000 },
+  }),
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -79,6 +84,7 @@ app.use('/crear', require('./routes/wizard'));
 app.use('/', require('./routes/cv'));
 app.use('/', require('./routes/payment'));
 app.use('/editar', require('./routes/edit'));
+app.use('/cv-ejemplo', require('./routes/ejemplos'));
 
 // OWASP-FIX: A05 — Global error handler: never expose stack traces or internal details
 app.use((err, req, res, next) => {

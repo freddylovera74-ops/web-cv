@@ -19,7 +19,7 @@ async function suggestJobs(realJobs, count) {
     model: 'mistralai/mistral-7b-instruct',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.7,
-  });
+  }, { timeout: 4000 });
 
   const text = response.choices[0].message.content.trim();
   const jsonMatch = text.match(/\[[\s\S]*\]/);

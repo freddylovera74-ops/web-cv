@@ -1,4 +1,4 @@
-function renderCvHtml(user, cvData, options = {}) {
+function renderCvHtml(user, cvData, options = {}, baseUrl = process.env.BASE_URL || '') {
   const profile = safeJson(cvData.profile, {});
   const jobs = cvData.jobs || [];
   const aiJobs = cvData.ai_suggested_jobs || [];
@@ -74,7 +74,20 @@ function renderCvHtml(user, cvData, options = {}) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CV — ${escHtml(displayName)}</title>
+  <title>CV de ${escHtml(displayName)} — CreaCV</title>
+  <meta name="description" content="Curriculum vitae profesional de ${escHtml(displayName)}.">
+  <meta property="og:title" content="CV de ${escHtml(displayName)}">
+  <meta property="og:description" content="Curriculum vitae generado con CreaCV.">
+  <meta property="og:url" content="${baseUrl}/ver/${escHtml(options.shareToken || '')}">
+  <meta property="og:image" content="${baseUrl}/og-image.png">
+  <meta name="robots" content="noindex, nofollow">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Person","name":"${escHtml(displayName)}",
+   ${allJobs.length ? `"jobTitle":"${escHtml(allJobs[0].position || allJobs[0].cargo || '')}",` : ''}
+   ${profile.city ? `"address":{"@type":"PostalAddress","addressLocality":"${escHtml(profile.city)}"},` : ''}
+   ${profile.phone ? `"telephone":"${escHtml(profile.phone)}",` : ''}
+   "url":"${baseUrl}/ver/${escHtml(options.shareToken || '')}"}
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700;800&family=Source+Sans+3:wght@400;600&display=swap');
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

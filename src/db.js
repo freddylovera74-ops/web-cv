@@ -1,5 +1,10 @@
 const Database = require('better-sqlite3');
 const path = require('path');
+const crypto = require('crypto');
+
+function generateToken() {
+  return crypto.randomBytes(16).toString('hex');
+}
 
 const DB_PATH = path.join(__dirname, '..', 'data', 'cv.db');
 
@@ -55,6 +60,21 @@ function initDb() {
     } catch (_) {}
   });
 
+  // Add view_token column for private CV sharing
+  try {
+    db.exec(`ALTER TABLE users ADD COLUMN view_token TEXT`);
+  } catch (_) {}
+
+  // Backfill view_token for users that don't have one
+  const usersWithoutToken = db.prepare(`SELECT id FROM users WHERE view_token IS NULL`).all();
+  const fillToken = db.prepare(`UPDATE users SET view_token = ? WHERE id = ?`);
+  const fillAll = db.transaction(() => {
+    for (const u of usersWithoutToken) {
+      fillToken.run(generateToken(), u.id);
+    }
+  });
+  fillAll();
+
   console.log('Database initialized');
 }
 
@@ -68,8 +88,12 @@ function getUserById(id) {
 
 function createUserByPhone(phone) {
   const db = getDb();
-  const result = db.prepare('INSERT INTO users (phone_number) VALUES (?)').run(phone);
+  const result = db.prepare('INSERT INTO users (phone_number, view_token) VALUES (?, ?)').run(phone, generateToken());
   return db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
+}
+
+function getUserByViewToken(token) {
+  return getDb().prepare('SELECT * FROM users WHERE view_token = ?').get(token);
 }
 
 function updateWhatsappStep(userId, step, data) {
@@ -101,4 +125,4 @@ function hasPaidForVersion(userId, cvVersion) {
     .get(userId, cvVersion, 'paid');
 }
 
-module.exports = { getDb, initDb, getUserByPhone, getUserById, createUserByPhone, updateWhatsappStep, getCvData, upsertCvData, hasPaidForVersion };
+module.exports = { getDb, initDb, getUserByPhone, getUserById, getUserByViewToken, createUserByPhone, updateWhatsappStep, getCvData, upsertCvData, hasPaidForVersion };

@@ -6,7 +6,17 @@
       "Bash(node -e ':*)",
       "Bash(npm audit:*)",
       "Bash(gh auth:*)",
-      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")"
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")",
+      "Bash(where gh:*)",
+      "Bash(where git:*)",
+      "Bash(winget install:*)",
+      "Bash(cmd /c \"C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe\" auth status)",
+      "Bash(\"/c/Program Files/GitHub CLI/gh.exe\" auth status)",
+      "Read(//c/Users/Freddy Lovera/AppData/Roaming/GitHub CLI/**)",
+      "Read(//c/Users/Freddy Lovera/.config/gh/**)",
+      "Read(//c/Users/Freddy Lovera/**)",
+      "Bash(powershell.exe -Command \"& 'C:\\\\Program Files\\\\GitHub CLI\\\\gh.exe' auth status\")",
+      "Bash(node -e \"require\\('dotenv'\\).config\\(\\); require\\('./src/config/validateEnv'\\)\\(\\)\")"
     ]
   }
 }

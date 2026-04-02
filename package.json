@@ -5,7 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "dev": "node src/app.js",
-    "start": "node src/app.js"
+    "start": "node src/app.js",
+    "check-env": "node -e \"require('dotenv').config(); require('./src/config/validateEnv')()\""
   },
   "license": "ISC",
   "type": "commonjs",

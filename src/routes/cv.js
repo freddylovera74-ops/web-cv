@@ -29,7 +29,7 @@ router.get('/cv/:userId', (req, res) => {
   cvData.jobs = JSON.parse(cvData.jobs || '[]');
   cvData.ai_suggested_jobs = JSON.parse(cvData.ai_suggested_jobs || '[]');
 
-  const html = renderCvHtml(user, cvData, { showPayButton: true });
+  const html = renderCvHtml(user, cvData, { showPayButton: true, watermark: true });
   res.send(html);
 });
 

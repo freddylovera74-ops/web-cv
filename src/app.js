@@ -19,14 +19,20 @@ app.set('trust proxy', 1);
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", 'data:'],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      objectSrc: ["'none'"],
-      frameSrc: ["'none'"],
+      defaultSrc:     ["'self'"],
+      scriptSrc:      ["'self'", "'unsafe-inline'"],
+      // Helmet 8 defaults script-src-attr to 'none', which blocks onclick="..." handlers.
+      // We allow unsafe-inline here to match scriptSrc (same trust level).
+      scriptSrcAttr:  ["'unsafe-inline'"],
+      styleSrc:       ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+      fontSrc:        ["'self'", 'https://fonts.gstatic.com'],
+      imgSrc:         ["'self'", 'data:'],
+      connectSrc:     ["'self'"],
+      objectSrc:      ["'none'"],
+      // Allow 'self' iframes for the CV preview (srcdoc) in wizard and ejemplos pages
+      frameSrc:       ["'self'"],
+      // Explicitly allow form submissions to our own server AND to Stripe checkout
+      formAction:     ["'self'", 'https://checkout.stripe.com'],
     },
   },
   crossOriginEmbedderPolicy: false,

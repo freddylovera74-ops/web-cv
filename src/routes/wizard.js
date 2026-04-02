@@ -460,8 +460,11 @@ router.post('/guardar', requireAuth, (req, res) => {
   }
 
   req.session.wizard = null;
+  // If logged in via Google, they are the owner and don't need the token.
+  // The token would only be null for users created before the view_token migration.
   const savedUser = db.prepare('SELECT view_token FROM users WHERE id = ?').get(userId);
-  res.redirect(`/cv/${userId}?token=${savedUser.view_token}`);
+  const token = savedUser && savedUser.view_token ? `?token=${savedUser.view_token}` : '';
+  res.redirect(`/cv/${userId}${token}`);
 });
 
 // ── Helper renderers ──────────────────────────────────────────────────────

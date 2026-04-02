@@ -48,6 +48,13 @@ function initDb() {
     );
   `);
 
+  // Add new columns for web wizard flow (safe: ignored if already exist)
+  ['profile', 'education', 'skills'].forEach(col => {
+    try {
+      db.exec(`ALTER TABLE cv_data ADD COLUMN ${col} TEXT DEFAULT '{}' `);
+    } catch (_) {}
+  });
+
   console.log('Database initialized');
 }
 

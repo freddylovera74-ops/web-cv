@@ -115,7 +115,7 @@ router.get('/paso/:step', requireAuth, (req, res) => {
   if (step === 1) {
     const d = wz.step1 || {};
     return res.send(layout('Datos personales', `
-      <form method="POST" action="/crear/paso/1">
+      <form method="POST" action="/crear/paso/1" id="form-step1">
         <div class="field-row">
           <div class="field">
             <label>Nombre *</label>
@@ -140,11 +140,57 @@ router.get('/paso/:step', requireAuth, (req, res) => {
           <label>Email</label>
           <input name="email" type="email" value="${escHtml(d.email || req.user.email || '')}" placeholder="ana@email.com">
         </div>
+
+        <div class="field photo-field">
+          <label>Foto de perfil <span class="label-optional">(opcional)</span></label>
+          <div class="photo-upload-wrap" onclick="document.getElementById('photo-input').click()">
+            <div id="photo-preview" class="photo-preview">
+              ${d.photo ? `<img src="${escHtml(d.photo)}" alt="foto">` : `<div class="photo-placeholder"><span class="photo-icon">📷</span><span>Subir foto</span></div>`}
+            </div>
+            <input type="file" id="photo-input" accept="image/*" style="display:none">
+          </div>
+          <p class="field-hint">No es obligatoria para optar a empleos — añadela solo si lo deseas.</p>
+          <input type="hidden" name="photo" id="photo-b64" value="${escHtml(d.photo || '')}">
+        </div>
+
         <div class="btn-row">
           <a href="/" class="btn-back">Cancelar</a>
           <button type="submit" class="btn-next">Siguiente →</button>
         </div>
       </form>
+      <style>
+        .label-optional { font-weight: 400; font-size: 11px; color: #8a9aaa; text-transform: none; letter-spacing: 0; }
+        .photo-upload-wrap { cursor: pointer; display: inline-block; }
+        .photo-preview { width: 96px; height: 96px; border-radius: 50%; overflow: hidden; border: 2px dashed #3a7ca5; display: flex; align-items: center; justify-content: center; background: #f0f7fa; transition: border-color 0.2s; }
+        .photo-preview:hover { border-color: #2c6490; }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-placeholder { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #3a7ca5; font-size: 11px; font-weight: 600; }
+        .photo-icon { font-size: 22px; }
+      </style>
+      <script>
+        document.getElementById('photo-input').addEventListener('change', function(e) {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            const img = new Image();
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              const MAX = 240;
+              const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+              canvas.width = img.width * ratio;
+              canvas.height = img.height * ratio;
+              canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+              const b64 = canvas.toDataURL('image/jpeg', 0.82);
+              document.getElementById('photo-b64').value = b64;
+              const preview = document.getElementById('photo-preview');
+              preview.innerHTML = '<img src="' + b64 + '" alt="foto">';
+            };
+            img.src = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      </script>
     `, step));
   }
 
@@ -276,7 +322,7 @@ router.get('/paso/:step', requireAuth, (req, res) => {
         is_real: true,
       })),
       ai_suggested_jobs: [],
-      profile: { nombre: profile.nombre, apellidos: profile.apellidos, email: profile.email, phone: profile.telefono, city: profile.ciudad },
+      profile: { nombre: profile.nombre, apellidos: profile.apellidos, email: profile.email, phone: profile.telefono, city: profile.ciudad, photo: profile.photo || '' },
       education: educacion,
       skills,
     };
@@ -311,8 +357,11 @@ router.get('/paso/:step', requireAuth, (req, res) => {
 // ── POST handlers ─────────────────────────────────────────────────────────
 
 router.post('/paso/1', requireAuth, (req, res) => {
-  const { nombre, apellidos, ciudad, email, telefono } = req.body;
+  const { nombre, apellidos, ciudad, email, telefono, photo } = req.body;
   if (!nombre || !nombre.trim() || !apellidos || !apellidos.trim()) return res.redirect('/crear/paso/1');
+  // Only accept valid base64 data URIs for photo; discard anything else
+  const safePhoto = (photo && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(photo))
+    ? photo : '';
   req.session.wizard = req.session.wizard || {};
   req.session.wizard.step1 = {
     nombre: nombre.trim().slice(0, 80),
@@ -320,6 +369,7 @@ router.post('/paso/1', requireAuth, (req, res) => {
     ciudad: (ciudad || '').trim().slice(0, 100),
     email: (email || '').trim().slice(0, 150),
     telefono: (telefono || '').trim().slice(0, 30),
+    photo: safePhoto,
   };
   res.redirect('/crear/paso/2');
 });
@@ -385,7 +435,7 @@ router.post('/guardar', requireAuth, (req, res) => {
 
   const db = getDb();
   const existing = db.prepare('SELECT id FROM cv_data WHERE user_id = ?').get(userId);
-  const profileJson = JSON.stringify({ nombre: profile.nombre, apellidos: profile.apellidos, email: profile.email, phone: profile.telefono, city: profile.ciudad });
+  const profileJson = JSON.stringify({ nombre: profile.nombre, apellidos: profile.apellidos, email: profile.email, phone: profile.telefono, city: profile.ciudad, photo: profile.photo || '' });
   const educationJson = JSON.stringify(educacion);
   const skillsJson = JSON.stringify(skills);
 

@@ -29,7 +29,7 @@ router.post('/create-checkout-session', async (req, res) => {
         price_data: {
           currency: 'eur',
           product_data: { name: 'Descarga de CV en PDF' },
-          unit_amount: 200,
+          unit_amount: 500,
         },
         quantity: 1,
       }],
@@ -40,7 +40,7 @@ router.post('/create-checkout-session', async (req, res) => {
     });
 
     db.prepare('INSERT INTO payments (user_id, cv_version, stripe_session_id, amount, status) VALUES (?, ?, ?, ?, ?)')
-      .run(userId, cvData.version, session.id, 200, 'pending');
+      .run(userId, cvData.version, session.id, 500, 'pending');
 
     res.redirect(303, session.url);
   } catch (e) {

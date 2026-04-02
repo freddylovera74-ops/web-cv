@@ -1,18 +1,26 @@
-const REQUIRED = [
+const REQUIRED_ALWAYS = [
   'GOOGLE_CLIENT_ID',
   'GOOGLE_CLIENT_SECRET',
   'SESSION_SECRET',
   'STRIPE_SECRET_KEY',
-  'STRIPE_WEBHOOK_SECRET',
   'TWILIO_ACCOUNT_SID',
   'TWILIO_AUTH_TOKEN',
-  'TWILIO_PHONE_NUMBER',
+  'WHATSAPP_NUMBER',
   'BASE_URL',
   'OPENROUTER_API_KEY',
 ];
 
+// Only required in production (webhook needs a public URL to register in Stripe)
+const REQUIRED_IN_PRODUCTION = [
+  'STRIPE_WEBHOOK_SECRET',
+];
+
 function validateEnv() {
-  const missing = REQUIRED.filter(key => !process.env[key]);
+  const required = process.env.NODE_ENV === 'production'
+    ? [...REQUIRED_ALWAYS, ...REQUIRED_IN_PRODUCTION]
+    : REQUIRED_ALWAYS;
+
+  const missing = required.filter(key => !process.env[key]);
 
   if (missing.length > 0) {
     console.error('\n❌ Missing required environment variables:');

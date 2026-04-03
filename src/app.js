@@ -86,6 +86,7 @@ app.use(passport.session());
 
 app.use('/auth', require('./routes/auth'));
 app.use('/webhook', require('./routes/whatsapp'));
+app.use('/chat', require('./routes/chat'));
 app.use('/crear', require('./routes/wizard'));
 app.use('/', require('./routes/cv'));
 app.use('/', require('./routes/payment'));

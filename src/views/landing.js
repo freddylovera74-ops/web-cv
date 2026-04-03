@@ -157,6 +157,9 @@ function renderLanding(user, stats = {}) {
     /* PATHS */
     .paths { background: #fff; }
     .paths-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 860px; margin: 0 auto; }
+    .paths-grid-3 { grid-template-columns: repeat(3, 1fr); max-width: 1020px; }
+    .btn-secondary-hero { background: transparent; color: #1e2d4d; border: 2px solid #1e2d4d; padding: 13px 28px; border-radius: 10px; font-size: 15px; font-weight: 700; text-decoration: none; display: inline-block; transition: all 0.2s; }
+    .btn-secondary-hero:hover { background: #1e2d4d; color: #fff; }
     .path-card { border-radius: 16px; padding: 36px 32px; border: 2px solid transparent; transition: box-shadow 0.2s; }
     .path-card:hover { box-shadow: 0 8px 32px rgba(30,45,77,0.1); }
     .path-web { background: #e8f0f7; border-color: #3a7ca5; }
@@ -227,7 +230,7 @@ function renderLanding(user, stats = {}) {
     @media (max-width: 640px) {
       nav, section { padding-left: 20px; padding-right: 20px; }
       .hero { padding: 56px 20px; }
-      .paths-grid, .steps-grid, .jobs-grid, .news-grid { grid-template-columns: 1fr; }
+      .paths-grid, .paths-grid-3, .steps-grid, .jobs-grid, .news-grid { grid-template-columns: 1fr; }
       .price-card { padding: 40px 28px; }
     }
   </style>
@@ -256,33 +259,37 @@ function renderLanding(user, stats = {}) {
     <span class="hero-stat">⚡ Listo en menos de 5 min</span>
   </div>
   <div class="hero-ctas">
+    <a href="/chat" class="btn-primary">🤖 Crear con Asistente IA</a>
     ${user
-      ? `<a href="/crear" class="btn-primary">Crear mi CV ahora</a>`
-      : `<a href="/auth/google" class="btn-primary">Empezar con Google — es gratis</a>`
+      ? `<a href="/crear" class="btn-secondary-hero">Formulario clásico</a>`
+      : `<a href="/crear" class="btn-secondary-hero">Formulario clásico</a>`
     }
-    <a href="https://wa.me/${waNumber}" class="btn-whatsapp">💬 Crear por WhatsApp</a>
+    <a href="https://wa.me/${waNumber}" class="btn-whatsapp">💬 WhatsApp</a>
   </div>
   <p class="hero-note">Crea gratis, descarga el PDF sin marca de agua por 5 EUR. Sin registro previo por WhatsApp.</p>
 </section>
 
 <!-- CAMINOS -->
 <section class="paths">
-  <p class="section-eyebrow">Dos formas de crear tu CV</p>
+  <p class="section-eyebrow">Tres formas de crear tu CV</p>
   <h2 class="section-title">Elige como prefieres</h2>
-  <div class="paths-grid">
+  <div class="paths-grid paths-grid-3">
+    <div class="path-card path-chat" style="border-color:#3a7ca5;background:linear-gradient(135deg,#e8f4fb,#f0f7fa)">
+      <div class="path-icon">🤖</div>
+      <h3>Asistente IA <span style="font-size:11px;background:#3a7ca5;color:#fff;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:4px;">NUEVO</span></h3>
+      <p>Responde preguntas en un chat estilo WhatsApp. La IA sugiere las funciones de tu puesto automaticamente.</p>
+      <a href="/chat" class="btn-path" style="background:#3a7ca5;color:#fff">Abrir asistente →</a>
+    </div>
     <div class="path-card path-web">
       <div class="path-icon">🖥️</div>
-      <h3>Formulario web</h3>
-      <p>Rellena nombre, experiencia, educacion y habilidades paso a paso. Anade una foto opcional. Ve la vista previa antes de pagar.</p>
-      ${user
-        ? `<a href="/crear" class="btn-path">Crear mi CV</a>`
-        : `<a href="/auth/google" class="btn-path">Entrar con Google</a>`
-      }
+      <h3>Formulario paso a paso</h3>
+      <p>Rellena nombre, experiencia, educacion y habilidades en 5 pasos. Anade foto opcional y ve la vista previa.</p>
+      <a href="/crear" class="btn-path">Usar formulario</a>
     </div>
     <div class="path-card path-wa">
       <div class="path-icon">💬</div>
       <h3>Por WhatsApp</h3>
-      <p>Habla con nuestro bot desde el movil. El te guia por todo el proceso sin necesidad de formularios ni registro web.</p>
+      <p>Habla con nuestro bot desde el movil. Sin formularios, sin registro. Solo responde los mensajes.</p>
       <a href="https://wa.me/${waNumber}" class="btn-path">Abrir WhatsApp</a>
     </div>
   </div>

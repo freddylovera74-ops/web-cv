@@ -1,12 +1,24 @@
 const router = require('express').Router();
 const passport = require('passport');
 
-router.get('/google', passport.authenticate('google', { scope: ['email', 'profile'] }));
+// Store a safe returnTo path before redirecting to Google
+router.get('/google', (req, res, next) => {
+  if (req.query.returnTo) {
+    // Validate: only allow relative paths (prevent open redirect)
+    const returnTo = req.query.returnTo;
+    if (/^\/[a-zA-Z0-9/?=&._-]*$/.test(returnTo)) {
+      req.session.returnTo = returnTo;
+    }
+  }
+  passport.authenticate('google', { scope: ['email', 'profile'] })(req, res, next);
+});
 
 router.get('/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect(`/cv/${req.user.id}`);
+    const returnTo = req.session.returnTo || `/cv/${req.user.id}`;
+    delete req.session.returnTo;
+    res.redirect(returnTo);
   }
 );
 

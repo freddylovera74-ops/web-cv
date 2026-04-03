@@ -10,10 +10,14 @@ passport.use(new GoogleStrategy({
   const db = getDb();
   const email = profile.emails[0].value;
 
+  const displayName = profile.displayName || '';
   let user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
   if (!user) {
-    const result = db.prepare('INSERT INTO users (email) VALUES (?)').run(email);
+    const result = db.prepare('INSERT INTO users (email, name) VALUES (?, ?)').run(email, displayName);
     user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
+  } else if (!user.name && displayName) {
+    db.prepare(`UPDATE users SET name=? WHERE id=?`).run(displayName, user.id);
+    user = db.prepare('SELECT * FROM users WHERE id = ?').get(user.id);
   }
   return done(null, user);
 }));

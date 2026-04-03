@@ -9,6 +9,7 @@ const { initDb, getDb } = require('./db');
 const SqliteStore = require('better-sqlite3-session-store')(session);
 require('./services/passport');
 
+const path = require('path');
 const app = express();
 
 // OWASP-FIX: A05 — Trust proxy for accurate IP detection behind reverse proxies (nginx, etc.)
@@ -63,6 +64,7 @@ app.use('/stripe-webhook', express.raw({ type: 'application/json' }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // OWASP-FIX: A07 — Harden session cookie + persist sessions in SQLite (survives deploys)
 app.use(session({
@@ -85,6 +87,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use('/auth', require('./routes/auth'));
+app.use('/perfil', require('./routes/perfil'));
 app.use('/webhook', require('./routes/whatsapp'));
 app.use('/chat', require('./routes/chat'));
 app.use('/crear', require('./routes/wizard'));

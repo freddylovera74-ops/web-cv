@@ -242,7 +242,8 @@ function renderLanding(user, stats = {}) {
   <div class="nav-links">
     <a href="#empleos" class="btn-nav btn-nav-outline">Ver empleos</a>
     ${user
-      ? `<a href="/cv/${user.id}" class="btn-nav btn-nav-solid">Mi CV</a>`
+      ? `<a href="/perfil" class="btn-nav btn-nav-outline" title="Mi perfil" style="padding:7px 14px">${escHtml(getNavInitials(user))}</a>
+         <a href="/cv/${user.id}" class="btn-nav btn-nav-solid">Mi CV</a>`
       : `<a href="/auth/google" class="btn-nav btn-nav-solid">Entrar con Google</a>`
     }
   </div>
@@ -410,6 +411,11 @@ function renderLanding(user, stats = {}) {
 function escHtml(str) {
   if (str == null) return '';
   return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function getNavInitials(user) {
+  const name = user.name || user.email || '';
+  return name.split(/[\s@]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
 }
 
 module.exports = { renderLanding };

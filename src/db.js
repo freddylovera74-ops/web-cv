@@ -65,6 +65,11 @@ function initDb() {
     db.exec(`ALTER TABLE users ADD COLUMN view_token TEXT`);
   } catch (_) {}
 
+  // Add profile columns to users for the /perfil dashboard
+  ['name TEXT', 'phone TEXT', 'city TEXT', 'photo_url TEXT', 'updated_at TEXT'].forEach(col => {
+    try { db.exec(`ALTER TABLE users ADD COLUMN ${col}`); } catch (_) {}
+  });
+
   // Backfill view_token for users that don't have one
   const usersWithoutToken = db.prepare(`SELECT id FROM users WHERE view_token IS NULL`).all();
   const fillToken = db.prepare(`UPDATE users SET view_token = ? WHERE id = ?`);
